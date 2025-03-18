@@ -1,11 +1,12 @@
 import React, { useContext, useState } from "react";
-// import { FaRegUser, FaPencilAlt, FaPhoneFlip } from "react-icons/fa";
-import { MdOutlineMailOutline } from "react-icons/md";
+import { MdOutlineMailOutline, MdPersonOutline, MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 import { RiLock2Fill } from "react-icons/ri";
+import { FaRegUser, FaPhone, FaArrowRight } from "react-icons/fa";
 import { Link, Navigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Context } from "../../main";
+import { motion } from "framer-motion";
 
 const Register = () => {
     const [step, setStep] = useState(1);
@@ -14,6 +15,7 @@ const Register = () => {
     const [phone, setPhone] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState("");
+    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         fathersName: "",
@@ -97,11 +99,9 @@ const Register = () => {
 
     const { isAuthorized, setIsAuthorized } = useContext(Context);
 
-// User validation failed: name: Name must contain at least 3 Characters!,
-//  role: `student` is not a valid enum value for path `role`.
-
     const handleRegister = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             const {data} = await axios.post(
                 "http://localhost:4000/api/v1/user/register",
@@ -119,6 +119,8 @@ const Register = () => {
         } catch (error) {
           const errorMessage = error.response?.data?.message || "An unexpected error occurred.";
           toast.error(errorMessage);
+        } finally {
+          setLoading(false);
         }
     };
 
@@ -134,964 +136,426 @@ const Register = () => {
         return <Navigate to={"/"} />;
     }
 
-    return (
-        <section className="min-h-screen flex flex-col items-center justify-center bg-white text-black p-6">
-            <div className="w-full max-w-md">
-                <div className="text-center mb-8">
-                    <h3 className="text-2xl font-semibold mt-4">
-                        Create a new account
-                    </h3>
+    // Animation variants
+    const fadeIn = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+    };
+
+    const renderStepIndicator = () => {
+        return (
+            <div className="flex justify-center mb-8">
+                <div className="flex items-center space-x-4">
+                    <motion.div 
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                        whileHover={{ scale: 1.1 }}
+                        onClick={() => step > 1 && setStep(1)}
+                    >
+                        1
+                    </motion.div>
+                    <div className={`w-16 h-1 ${step >= 2 ? 'bg-indigo-600' : 'bg-gray-200'}`}></div>
+                    <motion.div 
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 2 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                        whileHover={{ scale: 1.1 }}
+                        onClick={() => step > 2 && setStep(2)}
+                    >
+                        2
+                    </motion.div>
+                    <div className={`w-16 h-1 ${step >= 3 ? 'bg-indigo-600' : 'bg-gray-200'}`}></div>
+                    <motion.div 
+                        className={`w-8 h-8 rounded-full flex items-center justify-center ${step === 3 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                        whileHover={{ scale: 1.1 }}
+                        onClick={() => step > 3 && setStep(3)}
+                    >
+                        3
+                    </motion.div>
                 </div>
-                <form>
+            </div>
+        );
+    };
+
+    return (
+        <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-100 p-6 relative overflow-hidden">
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 z-0 overflow-hidden">
+                <svg 
+                    className="absolute top-0 right-0 text-blue-100 w-96 h-96 opacity-70 transform translate-x-1/3 -translate-y-1/4"
+                    viewBox="0 0 200 200" 
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path 
+                        fill="currentColor" 
+                        d="M45.3,-53.9C58.4,-46.3,68.9,-31.9,72.1,-15.8C75.3,0.4,71.3,18.2,62.5,31.1C53.8,44,40.2,51.9,25.6,57.5C11,63.2,-4.6,66.5,-20.4,63.2C-36.2,60,-52.3,50.1,-62,35.2C-71.7,20.2,-75.1,0.1,-69.8,-16.1C-64.6,-32.3,-50.6,-44.6,-36.1,-52.4C-21.6,-60.1,-6.5,-63.2,8.9,-63.5C24.3,-63.7,32.1,-61.5,45.3,-53.9Z" 
+                        transform="translate(100 100)" 
+                    />
+                </svg>
+                <svg 
+                    className="absolute -bottom-20 -left-20 text-indigo-100 w-80 h-80 opacity-70"
+                    viewBox="0 0 200 200" 
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path 
+                        fill="currentColor" 
+                        d="M38.9,-64.5C51.1,-58.4,62.3,-49.3,69.5,-37.1C76.7,-24.9,80,-9.5,78.9,5.6C77.8,20.8,72.4,35.7,63.2,48.5C54,61.2,41,71.8,25.5,78.5C10,85.3,-8.1,88.2,-23.7,83.9C-39.3,79.5,-52.4,68,-65.3,54.4C-78.2,40.8,-90.8,25.2,-93.7,7.7C-96.6,-9.9,-89.7,-29.4,-77.4,-42.7C-65.1,-56,-47.3,-63,-31.3,-68.5C-15.2,-74.1,-0.8,-78.2,11.8,-75.7C24.4,-73.2,26.7,-70.7,38.9,-64.5Z" 
+                        transform="translate(100 100)" 
+                    />
+                </svg>
+            </div>
+
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-xl z-10"
+            >
+                <div className="text-center mb-6">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+                        {step === 1 ? "Create Your Account" : 
+                         step === 2 ? "Personal Information" : 
+                         "Education Details"}
+                    </h2>
+                    <p className="text-gray-600 mt-2">
+                        {step === 1 ? "Get started with your job search journey" : 
+                         step === 2 ? "Help us know you better" : 
+                         "Share your educational background"}
+                    </p>
+                </div>
+
+                {renderStepIndicator()}
+
+                <form onSubmit={step === 3 ? handleRegister : (e) => e.preventDefault()}>
                     {step === 1 && (
-                        <>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Email
-                                </label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    // value={formData.email}
-                                    onChange={(e)=> setEmail(e.target.value)}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
+                        <motion.div 
+                            variants={fadeIn}
+                            initial="hidden"
+                            animate="visible"
+                            className="space-y-5"
+                        >
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <MdOutlineMailOutline className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="example@email.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
+                                    />
+                                </div>
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Name
-                                </label>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    // value={formData.name}
-                                    // onChange={handleChange}
-                                    onChange={(e)=> setName(e.target.value)}
-
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <MdPersonOutline className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        placeholder="Enter your full name"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        required
+                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
+                                    />
+                                </div>
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Phone
-                                </label>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    // value={formData.phone}
-                                    // onChange={handleChange}
-                                    onChange={(e)=> setPhone(e.target.value)}
-
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <FaPhone className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        placeholder="Enter your phone number"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                        required
+                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
+                                    />
+                                </div>
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Password
-                                </label>
-                                <input
-                                    type="password"
-                                    name="password"
-                                    // value={formData.password}
-                                    // onChange={handleChange}
-                                    onChange={(e)=> setPassword(e.target.value)}
-
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <RiLock2Fill className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        placeholder="Create a strong password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
+                                    />
+                                </div>
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Role
-                                </label>
-                                <select
-                                    name="role"
-                                    // value={formData.role}
-                                    // onChange={handleChange}
-                                    onChange={(e)=> setRole(e.target.value)}
-
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                >
-                                    <option value="">Select Role</option>
-                                    <option value="Student">Student</option>
-                                    {/* Add more role options as needed */}
-                                </select>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <FaRegUser className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                    <select
+                                        name="role"
+                                        value={role}
+                                        onChange={(e) => setRole(e.target.value)}
+                                        required
+                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
+                                    >
+                                        <option value="">Select Role</option>
+                                        <option value="Student">Student</option>
+                                        {/* Add more role options as needed */}
+                                    </select>
+                                </div>
                             </div>
 
-                            <button
+                            <motion.button
                                 type="button"
                                 onClick={() => setStep(2)}
-                                // onClick={handleRegister}
-                                className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-zinc-800 transition duration-300"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="w-full py-3 bg-gradient-to-r from-indigo-600 to-blue-500 text-white font-semibold rounded-lg transition duration-300 flex items-center justify-center"
                             >
-                                Next
-                            </button>
-                            <div className="text-center mt-4">
-                            <Link to="/login" className="text-lg text-green-700 hover:text-black">
-                                Login ?
-                            </Link>
+                                Continue <MdNavigateNext className="ml-2 text-xl" />
+                            </motion.button>
+                            
+                            <div className="text-center mt-6 pt-6 border-t border-gray-200">
+                                <p className="text-gray-600">Already have an account?</p>
+                                <Link to="/login" className="mt-2 inline-block text-indigo-600 font-medium hover:text-indigo-800 transition duration-200 flex items-center justify-center">
+                                    Sign in <FaArrowRight className="ml-2 text-xs" />
+                                </Link>
                             </div>
-                        </>
-                    )} 
+                        </motion.div>
+                    )}
+
                     {step === 2 && (
-                        <>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Father's Name
-                                </label>
+                        <motion.div 
+                            variants={fadeIn}
+                            initial="hidden"
+                            animate="visible"
+                            className="grid grid-cols-1 md:grid-cols-2 gap-5"
+                        >
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Father's Name</label>
                                 <input
                                     type="text"
                                     name="fathersName"
+                                    placeholder="Enter father's name"
                                     value={formData.fathersName}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
                                 />
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Mother's Name
-                                </label>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Mother's Name</label>
                                 <input
                                     type="text"
                                     name="mothersName"
+                                    placeholder="Enter mother's name"
                                     value={formData.mothersName}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
                                 />
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Middle Name
-                                </label>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Middle Name</label>
                                 <input
                                     type="text"
                                     name="middleName"
+                                    placeholder="Enter middle name"
                                     value={formData.middleName}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
                                 />
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Last Name
-                                </label>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
                                 <input
                                     type="text"
                                     name="lastName"
+                                    placeholder="Enter last name"
                                     value={formData.lastName}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
                                 />
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Candidate Full Name
-                                </label>
-                                <input
-                                    type="text"
-                                    name="candidateFullName"
-                                    value={formData.candidateFullName}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Date of Birth
-                                </label>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
                                 <input
                                     type="date"
                                     name="dateOfBirth"
                                     value={formData.dateOfBirth}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
                                 />
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Gender
-                                </label>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
                                 <select
                                     name="gender"
                                     value={formData.gender}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
                                 >
                                     <option value="">Select Gender</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                    <option value="other">Other</option>
-                                </select>
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    LGBTQ
-                                </label>
-                                <select
-                                    name="lgbtq"
-                                    value={formData.lgbtq}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                >
-                                    <option value="">Select Option</option>
-                                    <option value="yes">Yes</option>
-                                    <option value="no">No</option>
-                                    <option value="prefer_not_to_say">
-                                        Prefer not to say
-                                    </option>
-                                </select>
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Physically Disabled
-                                </label>
-                                <select
-                                    name="physicallyDisabled"
-                                    value={formData.physicallyDisabled}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                >
-                                    <option value="">Select Option</option>
-                                    <option value="yes">Yes</option>
-                                    <option value="no">No</option>
-                                </select>
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Physical Disability Details
-                                </label>
-                                <textarea
-                                    name="physicalDisabilityDetails"
-                                    value={formData.physicalDisabilityDetails}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                ></textarea>
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Nationality
-                                </label>
-                                <input
-                                    type="text"
-                                    name="nationality"
-                                    value={formData.nationality}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Foreign Language
-                                </label>
-                                <input
-                                    type="text"
-                                    name="foreignLanguage"
-                                    value={formData.foreignLanguage}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Foreign Language Proficiency
-                                </label>
-                                <select
-                                    name="foreignLanguageProficiency"
-                                    value={formData.foreignLanguageProficiency}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                >
-                                    <option value="">Select Proficiency</option>
-                                    <option value="beginner">Beginner</option>
-                                    <option value="intermediate">
-                                        Intermediate
-                                    </option>
-                                    <option value="advanced">Advanced</option>
-                                    <option value="fluent">Fluent</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
                                 </select>
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={() => setStep(3)}
-                                // onClick={handleRegister}
-                                className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-zinc-800 transition duration-300"
-                            >
-                                Next
-                            </button>
-                        </>
+                            <div className="flex space-x-4 col-span-full mt-6">
+                                <motion.button
+                                    type="button"
+                                    onClick={() => setStep(1)}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="flex-1 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg transition duration-300 flex items-center justify-center"
+                                >
+                                    <MdNavigateBefore className="mr-2 text-xl" /> Back
+                                </motion.button>
+                                
+                                <motion.button
+                                    type="button"
+                                    onClick={() => setStep(3)}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-blue-500 text-white font-semibold rounded-lg transition duration-300 flex items-center justify-center"
+                                >
+                                    Continue <MdNavigateNext className="ml-2 text-xl" />
+                                </motion.button>
+                            </div>
+                        </motion.div>
                     )}
+
                     {step === 3 && (
-                        <>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Branch
-                                </label>
+                        <motion.div 
+                            variants={fadeIn}
+                            initial="hidden"
+                            animate="visible"
+                            className="grid grid-cols-1 md:grid-cols-2 gap-5"
+                        >
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Current Pursuing Degree</label>
+                                <input
+                                    type="text"
+                                    name="currentPursuingDegree"
+                                    placeholder="e.g., B.Tech, BCA"
+                                    value={formData.currentPursuingDegree}
+                                    onChange={handleChange}
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Branch</label>
                                 <input
                                     type="text"
                                     name="branch"
+                                    placeholder="e.g., Computer Science"
                                     value={formData.branch}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
                                 />
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Class Roll Number
-                                </label>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Class Roll Number</label>
                                 <input
                                     type="text"
                                     name="classRollNumber"
+                                    placeholder="Your roll number"
                                     value={formData.classRollNumber}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
                                 />
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    PRN Number
-                                </label>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Year of Admission</label>
                                 <input
                                     type="text"
-                                    name="prnNumber"
-                                    value={formData.prnNumber}
+                                    name="yearOfAdmission"
+                                    placeholder="e.g., 2020"
+                                    value={formData.yearOfAdmission}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
                                 />
                             </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Student Mobile Number
-                                </label>
-                                <input
-                                    type="tel"
-                                    name="studentMobileNumber"
-                                    value={formData.studentMobileNumber}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Parent Mobile Number
-                                </label>
-                                <input
-                                    type="tel"
-                                    name="parentMobileNumber"
-                                    value={formData.parentMobileNumber}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    PAN Card Number
-                                </label>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Technologies Known</label>
                                 <input
                                     type="text"
-                                    name="panCardNumber"
-                                    value={formData.panCardNumber}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Aadhar Card Number
-                                </label>
-                                <input
-                                    type="text"
-                                    name="aadharCardNumber"
-                                    value={formData.aadharCardNumber}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Residential Address
-                                </label>
-                                <textarea
-                                    name="residentialAddress"
-                                    value={formData.residentialAddress}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                ></textarea>
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Current Location
-                                </label>
-                                <input
-                                    type="text"
-                                    name="currentLocation"
-                                    value={formData.currentLocation}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Current Address
-                                </label>
-                                <textarea
-                                    name="currentAddress"
-                                    value={formData.currentAddress}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                ></textarea>
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Permanent Residence City
-                                </label>
-                                <input
-                                    type="text"
-                                    name="permanentResidenceCity"
-                                    value={formData.permanentResidenceCity}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Permanent Residence State
-                                </label>
-                                <input
-                                    type="text"
-                                    name="permanentResidenceState"
-                                    value={formData.permanentResidenceState}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setStep(4)}
-                                // onClick={handleRegister}
-                                className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-zinc-800 transition duration-300"
-                            >
-                                Next
-                            </button>
-                        </>
-                    )}
-                    
-
-{step === 4 && (
-  <>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              School Name (10th)
-          </label>
-          <input
-              type="text"
-              name="schoolName"
-              value={formData.schoolName}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Board Name (10th)
-          </label>
-          <input
-              type="text"
-              name="boardName"
-              value={formData.boardName}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Year of Passing 10th
-          </label>
-          <input
-              type="number"
-              name="yearOfPassing10th"
-              value={formData.yearOfPassing10th}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Percentage in 10th
-          </label>
-          <input
-              type="number"
-              step="0.01"
-              name="percentage10th"
-              value={formData.percentage10th}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Year Gap After 10th
-          </label>
-          <input
-              type="number"
-              name="yearGapAfter10th"
-              value={formData.yearGapAfter10th}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              School/College Name (12th)
-          </label>
-          <input
-              type="text"
-              name="schoolCollegeName12th"
-              value={formData.schoolCollegeName12th}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Board Name (12th)
-          </label>
-          <input
-              type="text"
-              name="boardName12th"
-              value={formData.boardName12th}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Year of Passing 12th
-          </label>
-          <input
-              type="number"
-              name="yearOfPassing12th"
-              value={formData.yearOfPassing12th}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Percentage in 12th
-          </label>
-          <input
-              type="number"
-              step="0.01"
-              name="percentage12th"
-              value={formData.percentage12th}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Year Gap After 12th
-          </label>
-          <input
-              type="number"
-              name="yearGapAfter12th"
-              value={formData.yearGapAfter12th}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              School/College Name (Diploma)
-          </label>
-          <input
-              type="text"
-              name="schoolCollegeNameDiploma"
-              value={formData.schoolCollegeNameDiploma}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Board Name (Diploma)
-          </label>
-          <input
-              type="text"
-              name="boardNameDiploma"
-              value={formData.boardNameDiploma}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Year of Passing Diploma
-          </label>
-          <input
-              type="number"
-              name="yearOfPassingDiploma"
-              value={formData.yearOfPassingDiploma}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Diploma Graduated State
-          </label>
-          <input
-              type="text"
-              name="diplomaGraduatedState"
-              value={formData.diplomaGraduatedState}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      {/* Diploma Semester Percentages */}
-      {[1, 2, 3, 4, 5, 6].map((sem) => (
-          <div key={sem} className="mb-6">
-              <label className="block text-sm font-medium mb-2">{`Sem ${sem} Diploma Percentage`}</label>
-              <input
-                  type="number"
-                  step="0.01"
-                  name={`sem${sem}DiplomaPercentage`}
-                  value={
-                      formData[
-                          `sem${sem}DiplomaPercentage`
-                      ]
-                  }
-                  onChange={handleChange}
-                  className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-              />
-          </div>
-      ))}
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Aggregate Percentage Diploma
-          </label>
-          <input
-              type="number"
-              step="0.01"
-              name="aggregatePercentageDiploma"
-              value={formData.aggregatePercentageDiploma}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Year Gap After Diploma
-          </label>
-          <input
-              type="number"
-              name="yearGapAfterDiploma"
-              value={formData.yearGapAfterDiploma}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Current Pursuing Degree
-          </label>
-          <input
-              type="text"
-              name="currentPursuingDegree"
-              value={formData.currentPursuingDegree}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Year of Admission
-          </label>
-          <input
-              type="number"
-              name="yearOfAdmission"
-              value={formData.yearOfAdmission}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      {/* Current Degree Semester CGPA and Passing Dates */}
-      {[1, 2, 3, 4, 5].map((sem) => (
-          <React.Fragment key={sem}>
-              <div className="mb-6">
-                  <label className="block text-sm font-medium mb-2">{`Sem ${sem} CGPA`}</label>
-                  <input
-                      type="number"
-                      step="0.01"
-                      name={`sem${sem}CGPA`}
-                      value={formData[`sem${sem}CGPA`]}
-                      onChange={handleChange}
-                      className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                  />
-              </div>
-              <div className="mb-6">
-                  <label className="block text-sm font-medium mb-2">{`Sem ${sem} Passing Date`}</label>
-                  <input
-                      type="date"
-                      name={`sem${sem}PassingDate`}
-                      value={
-                          formData[`sem${sem}PassingDate`]
-                      }
-                      onChange={handleChange}
-                      className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                  />
-              </div>
-          </React.Fragment>
-      ))}
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Aggregate CGPI Till Sem 5
-          </label>
-          <input
-              type="number"
-              step="0.01"
-              name="aggregateCGPITillSem5"
-              value={formData.aggregateCGPITillSem5}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Aggregate Percentage Till Sem 5
-          </label>
-          <input
-              type="number"
-              step="0.01"
-              name="aggregatePercentageTillSem5"
-              value={formData.aggregatePercentageTillSem5}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Year Drop in UG
-          </label>
-          <input
-              type="number"
-              name="yearDropInUG"
-              value={formData.yearDropInUG}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Dead KT
-          </label>
-          <input
-              type="number"
-              name="deadKT"
-              value={formData.deadKT}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Total Dead KT
-          </label>
-          <input
-              type="number"
-              name="totalDeadKT"
-              value={formData.totalDeadKT}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Live KT
-          </label>
-          <input
-              type="number"
-              name="liveKT"
-              value={formData.liveKT}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Total Live KT
-          </label>
-          <input
-              type="number"
-              name="totalLiveKT"
-              value={formData.totalLiveKT}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Total Internal KT
-          </label>
-          <input
-              type="number"
-              name="totalInternalKT"
-              value={formData.totalInternalKT}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">
-              Total External KT
-          </label>
-          <input
-              type="number"
-              name="totalExternalKT"
-              value={formData.totalExternalKT}
-              onChange={handleChange}
-              className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-          />
-      </div>
-      <button
-          type="button"
-          onClick={() => setStep(5)}
-          className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-zinc-800 transition duration-300"
-      >
-          Next
-      </button>
-  </>
-)}
-
-                    
-                    {step === 5 && (
-                        <>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Year of Education Gap
-                                </label>
-                                <input
-                                    type="number"
-                                    name="yearOfEducationGap"
-                                    value={formData.yearOfEducationGap}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Additional Qualification
-                                </label>
-                                <textarea
-                                    name="additionalQualification"
-                                    value={formData.additionalQualification}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                    rows="3"
-                                ></textarea>
-                            </div>
-
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Technologies Known
-                                </label>
-                                <textarea
                                     name="technologiesKnown"
+                                    placeholder="e.g., Java, Python, React"
                                     value={formData.technologiesKnown}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                    rows="3"
-                                    placeholder="Separate technologies with commas"
-                                ></textarea>
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
+                                />
                             </div>
-
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Work Experience (Months)
-                                </label>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Work Experience (Months)</label>
                                 <input
                                     type="number"
                                     name="workExperienceMonths"
+                                    placeholder="e.g., 6"
                                     value={formData.workExperienceMonths}
                                     onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
+                                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 text-gray-700"
                                 />
                             </div>
 
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Internship Company
-                                </label>
-                                <input
-                                    type="text"
-                                    name="internshipCompany"
-                                    value={formData.internshipCompany}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
+                            <div className="flex space-x-4 col-span-full mt-6">
+                                <motion.button
+                                    type="button"
+                                    onClick={() => setStep(2)}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="flex-1 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg transition duration-300 flex items-center justify-center"
+                                >
+                                    <MdNavigateBefore className="mr-2 text-xl" /> Back
+                                </motion.button>
+                                
+                                <motion.button
+                                    type="submit"
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-blue-500 text-white font-semibold rounded-lg transition duration-300 flex items-center justify-center"
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    ) : "Complete Registration"}
+                                </motion.button>
                             </div>
-
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Internship Role
-                                </label>
-                                <input
-                                    type="text"
-                                    name="internshipRole"
-                                    value={formData.internshipRole}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Post Graduation CGPA
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    name="postGraduationCGPA"
-                                    value={formData.postGraduationCGPA}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium mb-2">
-                                    Work Experience (Years)
-                                </label>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    name="workExperienceYears"
-                                    value={formData.workExperienceYears}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border-black border-[1px] bg-zinc-100 rounded-lg"
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                onClick={handleRegister}
-                                className="w-full py-3 bg-black text-white font-semibold rounded-lg hover:bg-zinc-800 transition duration-300"
-                            >
-                                Complete Registration
-                            </button>
-                        </>
-                    )}
-                    {step > 1 && (
-                        <button
-                            type="button"
-                            onClick={() => setStep(step - 1)}
-                            className="w-full py-3 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600 transition duration-300 mt-4"
-                        >
-                            Previous
-                        </button>
+                        </motion.div>
                     )}
                 </form>
-            </div>
+            </motion.div>
         </section>
     );
 };

@@ -18,6 +18,7 @@ const Home = () => {
         <HeroSection />
         <HowItWorks />
         <PopularCategories />
+        <PopularCompanies />
       </section>
     </>
   );
